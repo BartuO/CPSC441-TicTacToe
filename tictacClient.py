@@ -14,7 +14,7 @@ Load/save game ~~ hardcoded directory! -- done
 endgame screen information -- done
 Exit -- done
 Go back to menu option -- done
-commandline arguments 
+commandline arguments -- done 
 error handling on network/game
 readme
 better mainmenu
