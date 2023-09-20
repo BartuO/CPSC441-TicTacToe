@@ -1,6 +1,7 @@
 import socket
 import sys
 import tkinter as tk
+from tkinter import messagebox
 
 
 
@@ -31,33 +32,6 @@ client_socket.connect((host, port))
 
 
 
-def newGame():
-    print("hello")
-    client_socket.sendall("NEWG".encode("ascii"))
-    board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
-
-    client_char = "X"
-
-    for i in board:
-        if(i != "2"):
-            client_char = "O"
-            break
-
-    gameLoop(board, client_char)
-
-
-def loadGame():
-    return 0
-
-def gameLoop(board, client_char):
-    gameOn = True
-
-    while gameOn:
-        print(board)
-
-        makeMove((1,1))
-
-        board = getBoard()
 
 
 
@@ -97,14 +71,20 @@ def makeMove(coordinate):
 
 
 def getBoard():
+    global game_on
     board = client_socket.recv(1024).decode("ascii").split(":")
-    if(board == "OVER"):
+    
+    if(board[0] == "OVER"):
         #endgame implementation
+        
         print("gameover")
-    elif(board == "EROR"):
+        game_on = False
+        return board[1].split(",")[1:]
+    elif(board[0] == "EROR"):
         #error handling
         print("illegal move or smthng else")
-    elif(board == "BORD"):
+    elif(board[0] == "BORD"):
+
         return board[1].split(",")
 
 
@@ -114,6 +94,11 @@ def getBoard():
 ##interface
 global clean_list
 global client_char
+global game_on
+global temp_move
+
+
+temp_move = None
 clean_list = []
 
 window = tk.Tk()
@@ -170,14 +155,39 @@ def mainMenuScene():
     
 
 
-def handle_click(row, col):
-    if not interface_board[row][col]['text']:
-        interface_board[row][col]['text'] = client_char
+def handleClick(row, col):
+    global temp_move
+    global interface_board
+    if(game_on == True):
+        if not interface_board[row][col]['text']:
+            
+            if temp_move is not None:
+                interface_board[temp_move[0]][temp_move[1]]["text"] = "" 
 
-def refreshBoard():
+            temp_move = (row,col)
+            interface_board[row][col]['text'] = client_char
+            
+            
+            
+def confirmMove():
+    global temp_move
+
+    makeMove(temp_move)
+    temp_move = None
+    refreshInterfaceBoard(convertBoardToText(getBoard()))
+    if(game_on == False):
+                messagebox.showinfo("Game Over", "The game is over!")
+
+
+def refreshInterfaceBoard(board):
+    global interface_board
     for row in range(3):
         for col in range(3):
-            interface_board[row][col]['text'] = interface_board[row][col]
+                if(board[row][col] == "X"):
+                    interface_board[row][col]["fg"] = "red"
+                elif(board[row][col] == "O"):
+                    interface_board[row][col]["fg"] = "blue"
+                interface_board[row][col]['text'] = board[row][col]
         
 
 
@@ -214,17 +224,14 @@ def gameScene():
     
     for row in range(3):
         for col in range(3):
-            interface_board[row][col].bind("<Button-1>", lambda event, row=row, col=col: handle_click(row, col))
+            interface_board[row][col].bind("<Button-1>", lambda event, row=row, col=col: handleClick(row, col))
 
-    playButton = tk.Button(gameScene, text="Play", width=15, height=2)
+    playButton = tk.Button(gameScene, text="Play", width=15, height=2, command = confirmMove)
     playButton.grid(row = 4, column = 1, pady = 15)
+
     clean_list.append(playButton)  
 
 
-def changeInterfaceBoard(board):
-    for row in range(3):
-        for col in range(3):
-            interface_board[row][col]['text'] = str(board[row][col])
 
 
 def loadGameScene():
@@ -236,9 +243,11 @@ def newGameScene():
 
     global interface_board
     global client_char 
+    global game_on
     
     client_socket.sendall("NEWG".encode("ascii"))
     board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
+    game_on = True
 
     client_char = "X"
 
@@ -249,11 +258,13 @@ def newGameScene():
     
     print(board)
 
-    changeInterfaceBoard(convertBoardToText(board))
-
-    print(intre)
-
     gameScene()
+
+    refreshInterfaceBoard(convertBoardToText(board))
+
+    
+
+    
 
 
 
