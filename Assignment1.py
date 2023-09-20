@@ -11,16 +11,15 @@ from tkinter import filedialog
 """
 Things to add:
 Load/save game ~~ hardcoded directory! -- done
-endgame screen information
-show score?
+endgame screen information -- done
 Exit -- done
 Go back to menu option -- done
-commandline arguments
+commandline arguments 
 error handling on network/game
 readme
 better mainmenu
 make sure to remove print statements after finishing
-
+show score?
 
 
 after finishing:
@@ -29,6 +28,15 @@ ask what show score is supposed to be
 beat AI
 
  """
+
+
+if len(sys.argv) != 3:
+    print("Wrong number of arguments. Exiting")
+    sys.exit()
+else:
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+
 
 
 
@@ -42,9 +50,7 @@ if not os.path.exists(saves_directory):
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-host = "136.159.5.25"
 
-port = 6969
 
 print("WELCOME TO THE TIC TAC TOE XD")
 
