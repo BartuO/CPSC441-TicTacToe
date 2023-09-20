@@ -6,7 +6,23 @@ from tkinter import messagebox
 
 
 
+"""
+Things to add:
+Load/save game ~~ hardcoded directory!
+endgame screen information
+show score?
+Exit
+Go back to menu option
+commandline arguments
+error handling on network/game
+readme
+better mainmenu
+make sure to remove print statements after finishing
 
+
+
+
+ """
 
 
 
@@ -96,17 +112,21 @@ global clean_list
 global client_char
 global game_on
 global temp_move
+global interface_board
 
 
 temp_move = None
 clean_list = []
+interface_board = [["", "", ""], ["", "", ""], ["", "", ""]]
+
+
 
 window = tk.Tk()
 window.title("TICTACTOE")
 window.geometry("700x500")
 
-global interface_board
-interface_board = [["", "", ""], ["", "", ""], ["", "", ""]]
+
+
 
 def clear_frame():
     global clean_list
