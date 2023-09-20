@@ -13,7 +13,7 @@ Things to add:
 Load/save game ~~ hardcoded directory! -- done
 endgame screen information
 show score?
-Exit
+Exit -- done
 Go back to menu option -- done
 commandline arguments
 error handling on network/game
@@ -104,9 +104,17 @@ def getBoard():
     
     if(board[0] == "OVER"):
         #endgame implementation
-        
+        global won
+
         print("gameover")
         game_on = False
+        
+        if board[1].split(",")[0] == "S":
+            won = False
+        elif board[1].split(",")[0] == "C":
+            won = True
+        else:
+            won = None
         return board[1].split(",")[1:]
     elif(board[0] == "EROR"):
         #error handling
@@ -124,9 +132,11 @@ global clean_list
 global client_char
 global game_on
 global temp_move
+global won
 global interface_board
 
 
+won = None
 temp_move = None
 clean_list = []
 interface_board = [["", "", ""], ["", "", ""], ["", "", ""]]
@@ -253,7 +263,25 @@ def confirmMove():
         temp_move = None
         refreshInterfaceBoard(convertBoardToText(getBoard()))
         if(game_on == False):
-                    messagebox.showinfo("Game Over", "The game is over!")
+                    global won
+                    if won == True:
+                        answer = messagebox.askquestion("Game Over", "You won the game. \n\nWould you like to start a new game? ")
+                        if answer == "yes":
+                            newGameScene()
+                        else:
+                            mainMenuScene()
+                    elif won == False:
+                        answer = messagebox.askquestion("Game Over", "AI won the game. \n\nWould you like to start a new game? ")
+                        if answer == "yes":
+                            newGameScene()
+                        else:
+                            mainMenuScene()
+                    else:
+                        answer = messagebox.askquestion("Game Over", "Game is a draw. \n\nWould you like to start a new game? ")
+                        if answer == "yes":
+                            newGameScene()
+                        else:
+                            mainMenuScene()
 
 
 def refreshInterfaceBoard(board):
