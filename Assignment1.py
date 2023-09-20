@@ -1,7 +1,9 @@
 import socket
 import sys
+import os
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
 
 
 
@@ -26,6 +28,12 @@ make sure to remove print statements after finishing
 
 
 
+
+current_directory = os.path.dirname(os.path.abspath(__file__))
+saves_directory = current_directory + "/Game Saves"
+
+if not os.path.exists(saves_directory):
+    os.mkdir(saves_directory)
 
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -143,6 +151,51 @@ frame = tk.Frame(window)
 frame.pack(fill = tk.BOTH, expand = True)
 
 
+def save_file():
+    file_path = filedialog.asksaveasfilename(defaultextension = ".txt", initialdir = saves_directory)
+    if file_path:
+        with open(file_path, "w") as f:
+            f.write(str(client_char) + ",")
+    
+            for row in range(3):
+                for col in range(3):
+                    i = interface_board[row][col]["text"]
+                    if (i == ""):
+                        f.write("2,")
+                    elif(i == "X"):
+                        f.write("0,")
+                    elif(i == "O"):
+                        f.write("1,")
+
+
+        
+
+
+
+def load_file():
+    file_path = filedialog.askopenfilename(initialdir = saves_directory, defaultextension=".txt")
+    if file_path:
+        with open(file_path, "r") as f:
+            game = f.readline()
+            if game:
+
+                global client_char
+                global game_on
+
+                client_socket.sendall(f"LOAD:{game[:-1]}".encode("ascii"))
+                board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
+                game_on = True
+
+                client_char = game[0]
+
+                gameScene()
+
+                refreshInterfaceBoard(convertBoardToText(board))
+    else:
+        #error handling etc
+        return 0
+
+
 def mainMenuScene():
     clear_frame()
 
@@ -160,7 +213,7 @@ def mainMenuScene():
     button1.grid(row=2, column=1, padx=5)
     clean_list.append(button1)  
 
-    button2 = tk.Button(mainMenu, text="Button 2", width=15, height=2)
+    button2 = tk.Button(mainMenu, text="Load Saved Game", width=15, height=2, command = load_file)
     button2.grid(row=3, column=1, padx=5)
     clean_list.append(button2)  
 
@@ -191,12 +244,12 @@ def handleClick(row, col):
             
 def confirmMove():
     global temp_move
-
-    makeMove(temp_move)
-    temp_move = None
-    refreshInterfaceBoard(convertBoardToText(getBoard()))
-    if(game_on == False):
-                messagebox.showinfo("Game Over", "The game is over!")
+    if temp_move != None:
+        makeMove(temp_move)
+        temp_move = None
+        refreshInterfaceBoard(convertBoardToText(getBoard()))
+        if(game_on == False):
+                    messagebox.showinfo("Game Over", "The game is over!")
 
 
 def refreshInterfaceBoard(board):
@@ -224,10 +277,10 @@ def gameScene():
 
     menubar = tk.Menu(window)
     
-    menubar.add_command(label="Open")
-    menubar.add_command(label="Save")
+    menubar.add_command(label=" Save ", command = save_file)
+
     menubar.add_separator()
-    menubar.add_command(label="Exit")
+    menubar.add_command(label=" Back To Main Menu ")
 
 
     window.config(menu = menubar)
