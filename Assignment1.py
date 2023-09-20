@@ -10,11 +10,11 @@ from tkinter import filedialog
 
 """
 Things to add:
-Load/save game ~~ hardcoded directory!
+Load/save game ~~ hardcoded directory! -- done
 endgame screen information
 show score?
 Exit
-Go back to menu option
+Go back to menu option -- done
 commandline arguments
 error handling on network/game
 readme
@@ -23,6 +23,10 @@ make sure to remove print statements after finishing
 
 
 
+after finishing:
+check if tkinter is ok
+ask what show score is supposed to be
+beat AI
 
  """
 
@@ -217,11 +221,11 @@ def mainMenuScene():
     button2.grid(row=3, column=1, padx=5)
     clean_list.append(button2)  
 
-    button3 = tk.Button(mainMenu, text="Button 3", width=15, height=2)
+    button3 = tk.Button(mainMenu, text="Show Score", width=15, height=2)
     button3.grid(row=4, column=1, padx=5)
     clean_list.append(button3)  
 
-    button4 = tk.Button(mainMenu, text="Button 4", width=15, height=2)
+    button4 = tk.Button(mainMenu, text="Exit", width=15, height=2, command = exitGame)
     button4.grid(row=5, column=1, padx=5)
     clean_list.append(button4)  
 
@@ -262,6 +266,12 @@ def refreshInterfaceBoard(board):
                     interface_board[row][col]["fg"] = "blue"
                 interface_board[row][col]['text'] = board[row][col]
         
+def exitGame():
+    result = messagebox.askquestion("Exit", "Are you sure?")
+    if result == "yes":
+        client_socket.sendall("CLOS".encode("ascii"))
+        window.destroy()
+
 
 
 def gameScene():
@@ -280,7 +290,7 @@ def gameScene():
     menubar.add_command(label=" Save ", command = save_file)
 
     menubar.add_separator()
-    menubar.add_command(label=" Back To Main Menu ")
+    menubar.add_command(label=" Back To Main Menu ", command = mainMenuScene)
 
 
     window.config(menu = menubar)
@@ -305,10 +315,6 @@ def gameScene():
     clean_list.append(playButton)  
 
 
-
-
-def loadGameScene():
-    return 0
 
 
 
