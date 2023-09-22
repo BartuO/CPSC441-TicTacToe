@@ -18,7 +18,7 @@ Exit -- done
 Go back to menu option -- done
 commandline arguments -- done 
 centre in the middle --done
-show score?
+show score? -- done
 error handling on network/game
 readme
 better mainmenu
@@ -57,7 +57,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 
-print("WELCOME TO THE TIC TAC TOE XD")
+print("WELCOME TO THE TICTACTOE")
 
 client_socket.connect((host, port))
 
@@ -117,7 +117,6 @@ def getBoard():
         #endgame implementation
         global won
 
-        print("gameover")
         game_on = False
         
         if board[1].split(",")[0] == "S":
@@ -164,6 +163,7 @@ screen_height = window.winfo_screenheight()
 x = (screen_width - width) // 2
 y = (screen_height - height) // 2
 
+window.iconbitmap(current_directory + "/tictactoe.ico")
 window.geometry(f"{width}x{height}+{x}+{y}")
 
 
@@ -240,22 +240,23 @@ def mainMenuScene():
    
     greeting_label = tk.Label(mainMenu, text="Welcome", font=("Helvetica", 16))
     greeting_label.grid(row=1, column=1, pady=(10, 5))
-    clean_list.append(greeting_label)  
+    clean_list.append(greeting_label)
+
 
     button1 = tk.Button(mainMenu, text="New Game", width=15, height=2, command = newGameScene)
-    button1.grid(row=2, column=1, padx=5)
+    button1.grid(row=3, column=1, padx=5)
     clean_list.append(button1)  
 
     button2 = tk.Button(mainMenu, text="Load Saved Game", width=15, height=2, command = load_file)
-    button2.grid(row=3, column=1, padx=5)
+    button2.grid(row=4, column=1, padx=5)
     clean_list.append(button2)  
 
     button3 = tk.Button(mainMenu, text="Show Score", width=15, height=2, command = showScoreScene)
-    button3.grid(row=4, column=1, padx=5)
+    button3.grid(row=5, column=1, padx=5)
     clean_list.append(button3)  
 
     button4 = tk.Button(mainMenu, text="Exit", width=15, height=2, command = exitGame)
-    button4.grid(row=5, column=1, padx=5)
+    button4.grid(row=6, column=1, padx=5)
     clean_list.append(button4)  
 
     
@@ -385,7 +386,7 @@ def newGameScene():
             client_char = "O"
             break
     
-    print(board)
+
 
     gameScene()
 
@@ -412,13 +413,13 @@ def showScoreScene():
     main_menu= tk.Button(scoreScene, text="Go Back To Main Menu", command= mainMenuScene)
     main_menu.grid(row=3, column=1, columnspan=1, padx=10, pady=20)
 
+
+
+
+
+
 mainMenuScene()
 window.mainloop()
-
-
-
-
-
 
 
 client_socket.close()
