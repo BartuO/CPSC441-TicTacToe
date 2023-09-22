@@ -21,11 +21,9 @@ centre in the middle --done
 show score? -- done
 error handling on network/game
 readme
-better mainmenu
-make sure to remove print statements after finishing
-
-
-change the icon?
+better mainmenu -- done
+make sure to remove print statements after finishing --done
+change the icon? -- done
 
 
 after finishing:
@@ -52,15 +50,21 @@ saves_directory = current_directory + "/Game Saves"
 if not os.path.exists(saves_directory):
     os.mkdir(saves_directory)
 
-
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+try:
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except Exception as e:
+    print(f"An error has occured during socket creation: {e}")
+    sys.exit()
 
 
 print("WELCOME TO THE TICTACTOE")
 
-client_socket.connect((host, port))
 
+try:
+    client_socket.connect((host, port))
+except Exception as e:
+    print(f"An error has occured while connecting to the server: {e}")
+    sys.exit()
 
 
 
@@ -106,13 +110,22 @@ def convertBoardToText(board):
 
 def makeMove(coordinate):
     f, s = coordinate
-    client_socket.sendall(("MOVE:" + str(f) + "," + str(s)).encode("ascii"))
-
+    try:
+        client_socket.sendall(("MOVE:" + str(f) + "," + str(s)).encode("ascii"))
+    except Exception as e:
+        print(f"Connection error: {e}")
+        sys.exit()
 
 def getBoard():
     global game_on
-    board = client_socket.recv(1024).decode("ascii").split(":")
-    
+    try:
+        board = client_socket.recv(1024).decode("ascii").split(":")
+    except Exception as e:
+        print(f"Connection error: {e}")
+        sys.exit()
+
+
+
     if(board[0] == "OVER"):
         #endgame implementation
         global won
@@ -126,9 +139,16 @@ def getBoard():
         else:
             won = None
         return board[1].split(",")[1:]
+    
     elif(board[0] == "EROR"):
         #error handling
-        print("illegal move or smthng else")
+        error_message = "This should never happen in any case because of the way game and interface are designed. \nIf it does, please reach out to me at: bartu.okan@ucalgary.ca \n\nPress 'Yes' if you would like to start a new game, 'No' if you would like to exit the game. "
+        answer = messagebox.askquestion("ERROR", error_message)
+        if answer == "yes":
+            newGameScene()
+        else:
+            exitGame()
+
     elif(board[0] == "BORD"):
 
         return board[1].split(",")
@@ -214,10 +234,13 @@ def load_file():
 
                 global client_char
                 global game_on
-
-                client_socket.sendall(f"LOAD:{game[:-1]}".encode("ascii"))
-                board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
-                game_on = True
+                try:
+                    client_socket.sendall(f"LOAD:{game[:-1]}".encode("ascii"))
+                    board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
+                    game_on = True
+                except Exception as e:
+                    print(f"Connection error: {e}")
+                    sys.exit()
 
                 client_char = game[0]
 
@@ -320,9 +343,12 @@ def refreshInterfaceBoard(board):
 def exitGame():
     result = messagebox.askquestion("Exit", "Are you sure?")
     if result == "yes":
-        client_socket.sendall("CLOS".encode("ascii"))
-        window.destroy()
-
+        try:
+            client_socket.sendall("CLOS".encode("ascii"))
+            window.destroy()
+        except Exception as e:
+            print(f"Connection error: {e}")
+            sys.exit()
 
 
 def gameScene():
@@ -375,9 +401,13 @@ def newGameScene():
     global client_char 
     global game_on
     
-    client_socket.sendall("NEWG".encode("ascii"))
-    board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
-    game_on = True
+    try:
+        client_socket.sendall("NEWG".encode("ascii"))
+        board = client_socket.recv(1024).decode("ascii").split(":")[1].split(",")
+        game_on = True
+    except Exception as e:
+        print(f"Connection error: {e}")
+        sys.exit()
 
     client_char = "X"
 
@@ -421,5 +451,8 @@ def showScoreScene():
 mainMenuScene()
 window.mainloop()
 
-
-client_socket.close()
+try:
+    client_socket.close()
+except Exception as e:
+    print(f"Connection error: {e}")
+    sys.exit()
