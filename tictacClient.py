@@ -8,6 +8,8 @@ from tkinter import filedialog
 
 
 
+# cd C:\Users\bartu\Desktop\UniStuff\2023Fall\CPSC441\Assignment1\CPSC441-TicTacToe && python tictacClient.py 136.159.5.25 6969
+
 """
 Things to add:
 Load/save game ~~ hardcoded directory! -- done
@@ -15,16 +17,19 @@ endgame screen information -- done
 Exit -- done
 Go back to menu option -- done
 commandline arguments -- done 
+centre in the middle --done
+show score?
 error handling on network/game
 readme
 better mainmenu
 make sure to remove print statements after finishing
-show score?
+
+
+change the icon?
 
 
 after finishing:
 check if tkinter is ok
-ask what show score is supposed to be
 beat AI
 
  """
@@ -139,9 +144,10 @@ global client_char
 global game_on
 global temp_move
 global won
+global score
 global interface_board
 
-
+score = [0,0,0] # Client, Draw, AI
 won = None
 temp_move = None
 clean_list = []
@@ -151,7 +157,14 @@ interface_board = [["", "", ""], ["", "", ""], ["", "", ""]]
 
 window = tk.Tk()
 window.title("TICTACTOE")
-window.geometry("700x500")
+width = 700
+height = 500
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+x = (screen_width - width) // 2
+y = (screen_height - height) // 2
+
+window.geometry(f"{width}x{height}+{x}+{y}")
 
 
 
@@ -237,7 +250,7 @@ def mainMenuScene():
     button2.grid(row=3, column=1, padx=5)
     clean_list.append(button2)  
 
-    button3 = tk.Button(mainMenu, text="Show Score", width=15, height=2)
+    button3 = tk.Button(mainMenu, text="Show Score", width=15, height=2, command = showScoreScene)
     button3.grid(row=4, column=1, padx=5)
     clean_list.append(button3)  
 
@@ -271,18 +284,21 @@ def confirmMove():
         if(game_on == False):
                     global won
                     if won == True:
+                        score[0] += 1
                         answer = messagebox.askquestion("Game Over", "You won the game. \n\nWould you like to start a new game? ")
                         if answer == "yes":
                             newGameScene()
                         else:
                             mainMenuScene()
                     elif won == False:
+                        score[2] += 1
                         answer = messagebox.askquestion("Game Over", "AI won the game. \n\nWould you like to start a new game? ")
                         if answer == "yes":
                             newGameScene()
                         else:
                             mainMenuScene()
                     else:
+                        score[1] += 1
                         answer = messagebox.askquestion("Game Over", "Game is a draw. \n\nWould you like to start a new game? ")
                         if answer == "yes":
                             newGameScene()
@@ -376,10 +392,25 @@ def newGameScene():
     refreshInterfaceBoard(convertBoardToText(board))
 
     
+def showScoreScene():
+    global score
 
+    clear_frame()
     
+    scoreScene = tk.Frame(window)
+    scoreScene.place(relx=.5, rely=.45,anchor= "center")
+    clean_list.append(scoreScene)
 
+    client_label = tk.Label(scoreScene, text= f"Client Won: {score[0]}", fg = "blue")
+    draw_label = tk.Label(scoreScene, text=  f"Draw: {score[1]}")
+    ai_label = tk.Label(scoreScene, text= f"AI Won: {score[2]}", fg = "red")
 
+    client_label.grid(row=0, column=0, padx=10, pady=10)
+    draw_label.grid(row=0, column=1, padx=10, pady=10)
+    ai_label.grid(row=0, column=2, padx=10, pady=10)
+
+    main_menu= tk.Button(scoreScene, text="Go Back To Main Menu", command= mainMenuScene)
+    main_menu.grid(row=3, column=1, columnspan=1, padx=10, pady=20)
 
 mainMenuScene()
 window.mainloop()
