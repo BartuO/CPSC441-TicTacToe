@@ -19,21 +19,22 @@ Go back to menu option -- done
 commandline arguments -- done 
 centre in the middle --done
 show score? -- done
-error handling on network/game
-readme
+error handling on network/game -- done
+readme -- 
 better mainmenu -- done
 make sure to remove print statements after finishing --done
 change the icon? -- done
-
+add comments -- done
 
 after finishing:
-check if tkinter is ok
+check if tkinter is ok -- done
 beat AI
 
  """
 
 
-if len(sys.argv) != 3:
+
+if len(sys.argv) != 3: #Checking if correct number of arguments are given
     print("Wrong number of arguments. Exiting")
     sys.exit()
 else:
@@ -43,14 +44,16 @@ else:
 
 
 
-
+#Getting the directory of the file
 current_directory = os.path.dirname(os.path.abspath(__file__))
 saves_directory = current_directory + "/Game Saves"
 
+#If the directory to put saves files in don't exist, create one
 if not os.path.exists(saves_directory):
     os.mkdir(saves_directory)
 
-try:
+
+try: #Creating the socket
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 except Exception as e:
     print(f"An error has occured during socket creation: {e}")
@@ -60,7 +63,7 @@ except Exception as e:
 print("WELCOME TO THE TICTACTOE")
 
 
-try:
+try: #Connecting to the server
     client_socket.connect((host, port))
 except Exception as e:
     print(f"An error has occured while connecting to the server: {e}")
@@ -77,7 +80,9 @@ except Exception as e:
 
 
 
-
+"""
+This function takes the board from the protocol and turns it into a 2-dimensional list that the interface can use.
+"""
 
 def convertBoardToText(board):
 
@@ -107,7 +112,9 @@ def convertBoardToText(board):
             
 
         
-
+"""
+This function sends the move played by the player to the server in the right messsage protocol.
+"""
 def makeMove(coordinate):
     f, s = coordinate
     try:
@@ -116,6 +123,9 @@ def makeMove(coordinate):
         print(f"Connection error: {e}")
         sys.exit()
 
+"""
+This functions recieves the message from the server and decides on how to use it.
+"""
 def getBoard():
     global game_on
     try:
@@ -126,10 +136,9 @@ def getBoard():
 
 
 
-    if(board[0] == "OVER"):
-        #endgame implementation
+    if(board[0] == "OVER"):#endgame implementation
+        
         global won
-
         game_on = False
         
         if board[1].split(",")[0] == "S":
@@ -140,8 +149,8 @@ def getBoard():
             won = None
         return board[1].split(",")[1:]
     
-    elif(board[0] == "EROR"):
-        #error handling
+    elif(board[0] == "EROR"):#error handling
+        
         error_message = "This should never happen in any case because of the way game and interface are designed. \nIf it does, please reach out to me at: bartu.okan@ucalgary.ca \n\nPress 'Yes' if you would like to start a new game, 'No' if you would like to exit the game. "
         answer = messagebox.askquestion("ERROR", error_message)
         if answer == "yes":
@@ -149,7 +158,7 @@ def getBoard():
         else:
             exitGame()
 
-    elif(board[0] == "BORD"):
+    elif(board[0] == "BORD"):#game continues 
 
         return board[1].split(",")
 
@@ -157,14 +166,15 @@ def getBoard():
 
 
 
-##interface
-global clean_list
-global client_char
-global game_on
-global temp_move
-global won
-global score
-global interface_board
+##Interface and Game Logic
+
+global clean_list #list of widgets to clear when changing frames
+global client_char  #character of the client, either X or O
+global game_on  # True if the game still goes on, False if not
+global temp_move #Temporary move on the client-side, is confirmed after play button is pressed and message is sent to the server
+global won #True if the player won the game, false if not
+global score #List of the score for the showScore() function [ClientWins, Draws, AIWins]
+global interface_board #2-D List of the board that is displayed on the interface
 
 score = [0,0,0] # Client, Draw, AI
 won = None
@@ -173,6 +183,7 @@ clean_list = []
 interface_board = [["", "", ""], ["", "", ""], ["", "", ""]]
 
 
+#Setting up the interface
 
 window = tk.Tk()
 window.title("TICTACTOE")
@@ -183,12 +194,16 @@ screen_height = window.winfo_screenheight()
 x = (screen_width - width) // 2
 y = (screen_height - height) // 2
 
-window.iconbitmap(current_directory + "/tictactoe.ico")
+##window.iconbitmap(current_directory + "/tictactoe.ico")  #commented out because i can't submit images
 window.geometry(f"{width}x{height}+{x}+{y}")
 
+frame = tk.Frame(window)
+frame.pack(fill = tk.BOTH, expand = True)
 
 
-
+""""
+This functions clears the scene
+"""
 def clear_frame():
     global clean_list
 
@@ -200,10 +215,11 @@ def clear_frame():
 
 
 
-frame = tk.Frame(window)
-frame.pack(fill = tk.BOTH, expand = True)
 
 
+"""
+This function handles saving the game to a text file
+"""
 def save_file():
     file_path = filedialog.asksaveasfilename(defaultextension = ".txt", initialdir = saves_directory)
     if file_path:
@@ -224,13 +240,15 @@ def save_file():
         
 
 
-
+"""
+This functions handles loading the file
+"""
 def load_file():
     file_path = filedialog.askopenfilename(initialdir = saves_directory, defaultextension=".txt")
     if file_path:
         with open(file_path, "r") as f:
             game = f.readline()
-            if game:
+            if game and len(game) == 20:
 
                 global client_char
                 global game_on
@@ -247,11 +265,16 @@ def load_file():
                 gameScene()
 
                 refreshInterfaceBoard(convertBoardToText(board))
-    else:
-        #error handling etc
-        return 0
+            else:#error handling
+                messagebox.showinfo("Error", "Problem loading the save file.")
 
+    else:#error handling
+        messagebox.showinfo("Error", "Problem loading the save file.")
+        
 
+"""
+This functions handles creating the Main Menu Scene and its interactions.
+"""
 def mainMenuScene():
     clear_frame()
 
@@ -284,7 +307,9 @@ def mainMenuScene():
 
     
 
-
+"""
+This functions handles clicks on the game board when a game is being played.
+"""
 def handleClick(row, col):
     global temp_move
     global interface_board
@@ -298,7 +323,10 @@ def handleClick(row, col):
             interface_board[row][col]['text'] = client_char
             
             
-            
+"""
+This functions handles the play button. It sends the information of the move that is played to the server after the button is pressed.
+It also handles the endgame screen.
+"""            
 def confirmMove():
     global temp_move
     if temp_move != None:
@@ -329,7 +357,9 @@ def confirmMove():
                         else:
                             mainMenuScene()
 
-
+"""
+This functions handles refreshing the interface game board after a move has been played by the server.
+"""
 def refreshInterfaceBoard(board):
     global interface_board
     for row in range(3):
@@ -339,7 +369,10 @@ def refreshInterfaceBoard(board):
                 elif(board[row][col] == "O"):
                     interface_board[row][col]["fg"] = "blue"
                 interface_board[row][col]['text'] = board[row][col]
-        
+
+"""
+This functions handles the exit game button.
+"""        
 def exitGame():
     result = messagebox.askquestion("Exit", "Are you sure?")
     if result == "yes":
@@ -350,7 +383,9 @@ def exitGame():
             print(f"Connection error: {e}")
             sys.exit()
 
-
+"""
+This function handles the game scene. 
+"""
 def gameScene():
     
     clear_frame()
@@ -394,7 +429,9 @@ def gameScene():
 
 
 
-
+"""
+This function handles the new game option in the main menu.
+"""
 def newGameScene():
 
     global interface_board
@@ -422,7 +459,9 @@ def newGameScene():
 
     refreshInterfaceBoard(convertBoardToText(board))
 
-    
+"""
+This function handles the show score option in the main menu
+"""    
 def showScoreScene():
     global score
 
@@ -432,7 +471,7 @@ def showScoreScene():
     scoreScene.place(relx=.5, rely=.45,anchor= "center")
     clean_list.append(scoreScene)
 
-    client_label = tk.Label(scoreScene, text= f"Client Won: {score[0]}", fg = "blue")
+    client_label = tk.Label(scoreScene, text= f"Player Won: {score[0]}", fg = "blue")
     draw_label = tk.Label(scoreScene, text=  f"Draw: {score[1]}")
     ai_label = tk.Label(scoreScene, text= f"AI Won: {score[2]}", fg = "red")
 
@@ -447,11 +486,12 @@ def showScoreScene():
 
 
 
-
+#Creating the scenes and starting the interface
 mainMenuScene()
 window.mainloop()
 
-try:
+
+try: #Closing the connection with the server
     client_socket.close()
 except Exception as e:
     print(f"Connection error: {e}")
